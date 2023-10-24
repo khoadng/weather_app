@@ -21,6 +21,9 @@ class OpenMeteoClient {
         'latitude': latitude,
         'longitude': longitude,
         'hourly': 'temperature_2m,weathercode',
+        'daily': 'temperature_2m_max,temperature_2m_min,weathercode',
+        'current': 'temperature_2m,weathercode',
+        'timezone': 'auto',
       },
     );
 

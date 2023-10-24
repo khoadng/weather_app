@@ -36,8 +36,8 @@ final wmoClientProvider = Provider<WmoDataClient>((ref) {
   return WmoDataClient();
 });
 
-final currentWeatherProvider = FutureProvider.autoDispose
-    .family<List<WeatherData>?, String>((ref, place) async {
+final currentWeatherProvider =
+    FutureProvider.autoDispose.family<WeatherData?, String>((ref, place) async {
   final weatherRepo = ref.watch(weatherRepoProvider);
   final locationRepo = ref.watch(locationRepoProvider);
   final location = await locationRepo.getLocation(place);
