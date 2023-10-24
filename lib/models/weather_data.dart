@@ -48,12 +48,14 @@ class DailyWeatherData extends Equatable {
     required this.temperatureMin,
     required this.description,
     required this.icon,
+    required this.date,
   });
 
   final Temperature temperatureMax;
   final Temperature temperatureMin;
   final String description;
   final String icon;
+  final DateTime date;
 
   @override
   List<Object?> get props => [
@@ -61,6 +63,7 @@ class DailyWeatherData extends Equatable {
         temperatureMin,
         description,
         icon,
+        date,
       ];
 }
 
@@ -70,9 +73,28 @@ class CurrentWeatherData extends Equatable {
     required this.description,
     required this.icon,
     required this.background,
+    required this.apparentTemperature,
+    required this.pressureSeaLevel,
+    required this.windSpeed,
+    required this.windDirection,
+    required this.precipitation,
+    required this.humidity,
+    required this.uvIndex,
+    required this.sunrise,
+    required this.sunset,
   });
 
   final Temperature temperature;
+  final Temperature apparentTemperature;
+  final double pressureSeaLevel;
+  final double windSpeed;
+  final int windDirection;
+  final double precipitation;
+  final int humidity;
+  final double uvIndex;
+  final DateTime sunrise;
+  final DateTime sunset;
+
   final String description;
   final String icon;
   final String background;
@@ -83,5 +105,14 @@ class CurrentWeatherData extends Equatable {
         description,
         icon,
         background,
+        apparentTemperature,
+        pressureSeaLevel,
+        windSpeed,
+        windDirection,
+        precipitation,
+        humidity,
+        uvIndex,
+        sunrise,
+        sunset,
       ];
 }

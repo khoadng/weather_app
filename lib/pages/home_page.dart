@@ -104,8 +104,107 @@ class _HomePageState extends ConsumerState<HomePage> {
             data,
             unit: ref.watch(currentTemperatureUnitProvider),
           ),
+          const SizedBox(height: 8),
+          _buildWeatherInfo(data),
+          const SizedBox(height: 8),
+          _buildDataSourceTile(),
         ],
       ),
+    );
+  }
+
+  Widget _buildDataSourceTile() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Data provided in part by ',
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+              ),
+            ),
+            TextSpan(
+              text: 'OpenMeteo.org',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherInfo(WeatherData data) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          children: [
+            FloatingGlassyCard(
+              width: MediaQuery.of(context).size.width * 0.45,
+              child: Column(
+                children: [
+                  WeatherInfoTile(
+                    title: 'Wind speed',
+                    value: '${data.current.windSpeed} m/s',
+                  ),
+                  WeatherInfoTile(
+                    title: 'Wind direction',
+                    value: '${data.current.windDirection}°',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            FloatingGlassyCard(
+              width: MediaQuery.of(context).size.width * 0.45,
+              child: Column(
+                children: [
+                  WeatherInfoTile(
+                    title: 'Sunrise',
+                    value: DateFormat('HH:mm').format(data.current.sunrise),
+                  ),
+                  WeatherInfoTile(
+                    title: 'Sunset',
+                    value: DateFormat('HH:mm').format(data.current.sunset),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: FloatingGlassyCard(
+            child: Column(
+              children: [
+                WeatherInfoTile(
+                  title: 'Humidity',
+                  value: '${data.current.humidity}%',
+                ),
+                WeatherInfoTile(
+                  title: 'Real feel',
+                  value: '${data.current.apparentTemperature.value.ceil()}°',
+                ),
+                WeatherInfoTile(
+                  title: 'Precipitation',
+                  value: '${data.current.precipitation.ceil()}%',
+                ),
+                WeatherInfoTile(
+                  title: 'Pressure',
+                  value: '${data.current.pressureSeaLevel} hPa',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -138,12 +237,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                         color: Colors.white,
                       ),
                 ),
+                const SizedBox(height: 8),
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text('UV ${data.current.uvIndex}'),
+                ),
               ],
             ),
           ),
-          Spacer(
-            flex: 1,
-          ),
+          const Spacer(flex: 1),
         ],
       ),
     );
@@ -158,9 +260,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text('24-hour forecast'),
+          const _CardTitle(
+            title: '24-hour forecast',
+            icon: Icons.punch_clock,
           ),
           Container(
             padding: const EdgeInsets.all(8),
@@ -204,9 +306,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text('7 days forecast'),
+          const _CardTitle(
+            title: '7-day forecast',
+            icon: Icons.calendar_today,
           ),
           ...data.daily.map((e) {
             final weather = e;
@@ -219,12 +321,106 @@ class _HomePageState extends ConsumerState<HomePage> {
                 width: 32,
                 child: ExtendedImage.network(weather.icon),
               ),
-              title: Text(weather.description),
-              trailing: Text('${temperatureMin.value.ceil()}° / '
-                  '${temperatureMax.value.ceil()}°'),
+              title: Row(
+                children: [
+                  Text(DateFormat('dd/MM').format(weather.date)),
+                  const SizedBox(width: 4),
+                  Text(weather.description),
+                ],
+              ),
+              trailing: RichText(
+                  text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${temperatureMin.value.ceil()}°',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' / ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Theme.of(context).hintColor.withOpacity(0.25),
+                    ),
+                  ),
+                  TextSpan(
+                    text: '${temperatureMax.value.ceil()}°',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  ),
+                ],
+              )),
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+class _CardTitle extends StatelessWidget {
+  const _CardTitle({
+    required this.title,
+    required this.icon,
+  });
+
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style:
+                Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 18),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WeatherInfoTile extends StatelessWidget {
+  const WeatherInfoTile({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+      minLeadingWidth: 0,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          color: Theme.of(context).hintColor,
+        ),
+      ),
+      trailing: Text(
+        value,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onBackground,
+        ),
       ),
     );
   }

@@ -51,6 +51,8 @@ class WeatherRepository {
             i < openMeteoWeatherData.temperature2mDailyMax.length;
             i++)
           DailyWeatherData(
+            date: DateTime.tryParse(openMeteoWeatherData.timeDaily[i]) ??
+                DateTime.now(),
             temperatureMax: Temperature.celsius(
                 openMeteoWeatherData.temperature2mDailyMax[i]),
             temperatureMin: Temperature.celsius(
@@ -70,8 +72,22 @@ class WeatherRepository {
           ),
       ],
       current: CurrentWeatherData(
+        sunrise: DateTime.tryParse(
+                openMeteoWeatherData.sunriseDaily.firstOrNull ?? '') ??
+            DateTime.now(),
+        sunset: DateTime.tryParse(
+                openMeteoWeatherData.sunsetDaily.firstOrNull ?? '') ??
+            DateTime.now(),
+        uvIndex: openMeteoWeatherData.uvIndexMaxDaily.firstOrNull ?? 0,
         temperature:
             Temperature.celsius(openMeteoWeatherData.temperature2mCurrent),
+        apparentTemperature:
+            Temperature.celsius(openMeteoWeatherData.apparentTemperature),
+        humidity: openMeteoWeatherData.humidity2m,
+        pressureSeaLevel: openMeteoWeatherData.pressureSeaLevel,
+        windSpeed: openMeteoWeatherData.windSpeed10m,
+        windDirection: openMeteoWeatherData.windDirection10m,
+        precipitation: openMeteoWeatherData.precipitation,
         description: getWeatherDescription(
           openMeteoWeatherData.weatherCodeCurrent.toString(),
           DateTime.tryParse(openMeteoWeatherData.timeCurrent) ?? DateTime.now(),

@@ -19,10 +19,10 @@ class FloatingGlassyCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(6)),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
         child: Material(
           elevation: 12,
-          color: Theme.of(context).cardColor.withOpacity(0.4),
+          color: Theme.of(context).cardColor.withOpacity(0.3),
           type: MaterialType.card,
           child: SizedBox(
             width: width ?? MediaQuery.of(context).size.width * 0.9,
