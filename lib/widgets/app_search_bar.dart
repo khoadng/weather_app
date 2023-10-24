@@ -6,11 +6,13 @@ class AppSearchBar extends StatefulWidget {
     required this.suggestionsBuilder,
     required this.onSelected,
     this.onSettingsPressed,
+    this.controller,
   });
 
   final Future<List<String>> Function(String query) suggestionsBuilder;
   final void Function(String value) onSelected;
   final void Function()? onSettingsPressed;
+  final SearchController? controller;
 
   @override
   State<AppSearchBar> createState() => _AppSearchBarState();
@@ -20,6 +22,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   @override
   Widget build(BuildContext context) {
     return SearchAnchor(
+        searchController: widget.controller,
         builder: (context, controller) {
           return SearchBar(
             controller: controller,

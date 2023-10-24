@@ -9,6 +9,7 @@ import 'package:weather_app/widgets/app_search_bar.dart';
 import 'package:weather_app/widgets/settings_modal.dart';
 
 import '../widgets/floating_glassy_card.dart';
+import '../widgets/weather_info_tile.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -18,70 +19,107 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   String? selectedLocation;
+  final searchController = SearchController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    searchController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          if (selectedLocation != null)
-            ref.watch(currentWeatherProvider(selectedLocation!)).maybeWhen(
-                  data: (data) =>
-                      data != null && data.current.background.isNotEmpty
-                          ? Positioned.fill(
-                              child: ExtendedImage.network(
-                                data.current.background,
-                                enableLoadState: false,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                  orElse: () => const SizedBox.shrink(),
-                ),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 64),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: AppSearchBar(
-                    suggestionsBuilder: (query) => ref
-                        .read(locationRepoProvider)
-                        .suggestLocations(query: query),
-                    onSelected: (value) {
-                      setState(
-                        () {
-                          selectedLocation = value;
-                        },
-                      );
-                    },
-                    onSettingsPressed: () => showModalBottomSheet(
-                      context: context,
-                      builder: (context) => const SettingsModal(),
-                    ),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        searchController.text = selectedLocation ?? '';
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          children: [
+            if (selectedLocation != null)
+              ref.watch(currentWeatherProvider(selectedLocation!)).maybeWhen(
+                    data: (data) =>
+                        data != null && data.current.background.isNotEmpty
+                            ? Positioned.fill(
+                                child: ExtendedImage.network(
+                                  data.current.background,
+                                  enableLoadState: false,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                    orElse: () => const SizedBox.shrink(),
                   ),
+            RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(currentWeatherProvider(selectedLocation!));
+              },
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 64),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: AppSearchBar(
+                        controller: searchController,
+                        suggestionsBuilder: (query) => ref
+                            .read(locationRepoProvider)
+                            .suggestLocations(query: query),
+                        onSelected: (value) {
+                          setState(
+                            () {
+                              selectedLocation = value;
+                            },
+                          );
+                        },
+                        onSettingsPressed: () => showModalBottomSheet(
+                          context: context,
+                          builder: (context) => const SettingsModal(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (selectedLocation != null)
+                      SizedBox(
+                        height: 24,
+                        child: ref
+                            .watch(currentWeatherProvider(selectedLocation!))
+                            .maybeWhen(
+                              skipLoadingOnRefresh: false,
+                              loading: () => Text(
+                                'Updating...',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onBackground),
+                              ),
+                              orElse: () => const SizedBox.shrink(),
+                            ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: selectedLocation != null
+                          ? ref
+                              .watch(currentWeatherProvider(selectedLocation!))
+                              .when(
+                                data: (data) => data != null
+                                    ? _buildWeather(data)
+                                    : const Text('No data'),
+                                error: (error, stackTrace) => const Text(
+                                    'Something went wrong, could not fetch weather data'),
+                                loading: () =>
+                                    const CircularProgressIndicator.adaptive(),
+                              )
+                          : const Text('No location selected'),
+                    )
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 42),
-                  child: selectedLocation != null
-                      ? ref
-                          .watch(currentWeatherProvider(selectedLocation!))
-                          .when(
-                            data: (data) => data != null
-                                ? _buildWeather(data)
-                                : const Text('No data'),
-                            error: (error, stackTrace) => const Text(
-                                'Something went wrong, could not fetch weather data'),
-                            loading: () =>
-                                const CircularProgressIndicator.adaptive(),
-                          )
-                      : const Text('No location selected'),
-                )
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -126,7 +164,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
             TextSpan(
-              text: 'OpenMeteo.org',
+              text: 'Open-Meteo.com',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onBackground,
                 fontWeight: FontWeight.bold,
@@ -316,6 +354,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             final temperatureMax = weather.temperatureMax.withUnit(unit);
 
             return ListTile(
+              visualDensity: VisualDensity.compact,
+              horizontalTitleGap: 4,
               leading: SizedBox(
                 height: 32,
                 width: 32,
@@ -323,9 +363,23 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
               title: Row(
                 children: [
-                  Text(DateFormat('dd/MM').format(weather.date)),
+                  Text(
+                    DateFormat('dd/MM').format(weather.date),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  Text(weather.description),
+                  Expanded(
+                      child: Text(
+                    weather.description,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  )),
                 ],
               ),
               trailing: RichText(
@@ -380,47 +434,20 @@ class _CardTitle extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          Icon(icon, size: 18),
+          Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).hintColor,
+          ),
           const SizedBox(width: 8),
           Text(
             title,
-            style:
-                Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 18),
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontSize: 18,
+                  color: Theme.of(context).hintColor,
+                ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class WeatherInfoTile extends StatelessWidget {
-  const WeatherInfoTile({
-    super.key,
-    required this.title,
-    required this.value,
-  });
-
-  final String title;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-      minLeadingWidth: 0,
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          color: Theme.of(context).hintColor,
-        ),
-      ),
-      trailing: Text(
-        value,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.onBackground,
-        ),
       ),
     );
   }
