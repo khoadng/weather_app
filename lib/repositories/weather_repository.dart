@@ -1,3 +1,5 @@
+import 'package:weather_app/models/tempeture.dart';
+
 import '../data/open_meteo/open_meteo_client.dart';
 import '../data/wmo/types.dart';
 import '../data/wmo/wmo_data_client.dart';
@@ -27,7 +29,8 @@ class WeatherRepository {
       hourly: [
         for (var i = 0; i < openMeteoWeatherData.weatherCode.length; i++)
           HourlyWeatherData(
-            temperature: openMeteoWeatherData.temperature2m[i],
+            temperature:
+                Temperature.celsius(openMeteoWeatherData.temperature2m[i]),
             description: getWeatherDescription(
               openMeteoWeatherData.weatherCode[i].toString(),
               DateTime.tryParse(openMeteoWeatherData.time[i]) ?? DateTime.now(),
@@ -47,8 +50,10 @@ class WeatherRepository {
             i < openMeteoWeatherData.temperature2mDailyMax.length;
             i++)
           DailyWeatherData(
-            temperatureMax: openMeteoWeatherData.temperature2mDailyMax[i],
-            temperatureMin: openMeteoWeatherData.temperature2mDailyMin[i],
+            temperatureMax: Temperature.celsius(
+                openMeteoWeatherData.temperature2mDailyMax[i]),
+            temperatureMin: Temperature.celsius(
+                openMeteoWeatherData.temperature2mDailyMin[i]),
             description: getWeatherDescription(
               openMeteoWeatherData.weatherCodeDaily[i].toString(),
               DateTime.tryParse(openMeteoWeatherData.timeDaily[i]) ??
@@ -64,7 +69,8 @@ class WeatherRepository {
           ),
       ],
       current: CurrentWeatherData(
-        temperature: openMeteoWeatherData.temperature2mCurrent,
+        temperature:
+            Temperature.celsius(openMeteoWeatherData.temperature2mCurrent),
         description: getWeatherDescription(
           openMeteoWeatherData.weatherCodeCurrent.toString(),
           DateTime.tryParse(openMeteoWeatherData.timeCurrent) ?? DateTime.now(),

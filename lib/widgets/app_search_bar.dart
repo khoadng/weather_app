@@ -5,10 +5,12 @@ class AppSearchBar extends StatefulWidget {
     super.key,
     required this.suggestionsBuilder,
     required this.onSelected,
+    this.onSettingsPressed,
   });
 
   final Future<List<String>> Function(String query) suggestionsBuilder;
   final void Function(String value) onSelected;
+  final void Function()? onSettingsPressed;
 
   @override
   State<AppSearchBar> createState() => _AppSearchBarState();
@@ -29,6 +31,14 @@ class _AppSearchBarState extends State<AppSearchBar> {
             onChanged: (_) {
               controller.openView();
             },
+            trailing: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  widget.onSettingsPressed?.call();
+                },
+              )
+            ],
             leading: const Icon(Icons.search),
           );
         },
@@ -42,6 +52,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     onTap: () {
                       setState(() {
                         controller.closeView(suggestion);
+                        FocusScope.of(context).unfocus();
                       });
                       widget.onSelected(suggestion);
                     },

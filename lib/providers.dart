@@ -3,6 +3,7 @@ import 'package:weather_app/data/wmo/wmo_data_client.dart';
 import 'package:weather_app/repositories/location/geocoding_data.dart';
 
 import 'data/open_meteo/open_meteo_client.dart';
+import 'models/tempeture.dart';
 import 'models/weather_data.dart';
 import 'repositories/location/location_repository.dart';
 import 'repositories/weather_repository.dart';
@@ -47,4 +48,9 @@ final currentWeatherProvider =
     longitude: location.lon,
   );
   return weathers;
+});
+
+final currentTemperatureUnitProvider =
+    StateProvider.autoDispose<TemperatureUnit>((ref) {
+  return TemperatureUnit.celsius;
 });

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:weather_app/models/tempeture.dart';
 
 class WeatherData extends Equatable {
   const WeatherData({
@@ -27,7 +28,7 @@ class HourlyWeatherData extends Equatable {
     required this.time,
   });
 
-  final double temperature;
+  final Temperature temperature;
   final String description;
   final String icon;
   final DateTime time;
@@ -49,8 +50,8 @@ class DailyWeatherData extends Equatable {
     required this.icon,
   });
 
-  final double temperatureMax;
-  final double temperatureMin;
+  final Temperature temperatureMax;
+  final Temperature temperatureMin;
   final String description;
   final String icon;
 
@@ -71,7 +72,7 @@ class CurrentWeatherData extends Equatable {
     required this.background,
   });
 
-  final double temperature;
+  final Temperature temperature;
   final String description;
   final String icon;
   final String background;

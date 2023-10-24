@@ -2,9 +2,11 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/models/tempeture.dart';
 import 'package:weather_app/models/weather_data.dart';
 import 'package:weather_app/providers.dart';
 import 'package:weather_app/widgets/app_search_bar.dart';
+import 'package:weather_app/widgets/settings_modal.dart';
 
 import '../widgets/floating_glassy_card.dart';
 
@@ -40,15 +42,24 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               children: [
                 const SizedBox(height: 64),
-                AppSearchBar(
-                  suggestionsBuilder: (query) => ref
-                      .read(locationRepoProvider)
-                      .suggestLocations(query: query),
-                  onSelected: (value) {
-                    setState(() {
-                      selectedLocation = value;
-                    });
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: AppSearchBar(
+                    suggestionsBuilder: (query) => ref
+                        .read(locationRepoProvider)
+                        .suggestLocations(query: query),
+                    onSelected: (value) {
+                      setState(
+                        () {
+                          selectedLocation = value;
+                        },
+                      );
+                    },
+                    onSettingsPressed: () => showModalBottomSheet(
+                      context: context,
+                      builder: (context) => const SettingsModal(),
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 42),
@@ -79,16 +90,28 @@ class _HomePageState extends ConsumerState<HomePage> {
       padding: const EdgeInsets.all(8),
       child: Column(
         children: [
-          _buildWeatherCurrent(data),
-          _buildWeatherDaily(data),
+          _buildWeatherCurrent(
+            data,
+            unit: ref.watch(currentTemperatureUnitProvider),
+          ),
+          _buildWeatherDaily(
+            data,
+            unit: ref.watch(currentTemperatureUnitProvider),
+          ),
           const SizedBox(height: 8),
-          _buildWeatherHourly(data),
+          _buildWeatherHourly(
+            data,
+            unit: ref.watch(currentTemperatureUnitProvider),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildWeatherCurrent(WeatherData data) {
+  Widget _buildWeatherCurrent(
+    WeatherData data, {
+    TemperatureUnit unit = TemperatureUnit.celsius,
+  }) {
     return SizedBox(
       height: 500,
       child: Column(
@@ -96,7 +119,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            '${data.current.temperature.toInt()}°',
+            '${data.current.temperature.withUnit(unit).value.ceil()}°',
             style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                   color: Colors.white,
                   fontSize: 100,
@@ -114,7 +137,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildWeatherHourly(WeatherData data) {
+  Widget _buildWeatherHourly(
+    WeatherData data, {
+    TemperatureUnit unit = TemperatureUnit.celsius,
+  }) {
     return FloatingGlassyCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,6 +157,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 final weather = data.hourly[index];
+                final temperature = weather.temperature.withUnit(unit);
+
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8),
@@ -138,7 +166,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       children: [
                         ExtendedImage.network(weather.icon),
                         Text(weather.description),
-                        Text('${weather.temperature.ceil()}°C'),
+                        Text(
+                            '${temperature.value.ceil()}${temperature.unitString}'),
                         const Spacer(),
                         Text(DateFormat('HH:mm').format(weather.time)),
                       ],
@@ -153,7 +182,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildWeatherDaily(WeatherData data) {
+  Widget _buildWeatherDaily(
+    WeatherData data, {
+    TemperatureUnit unit = TemperatureUnit.celsius,
+  }) {
     return FloatingGlassyCard(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,17 +194,22 @@ class _HomePageState extends ConsumerState<HomePage> {
           padding: EdgeInsets.all(12),
           child: Text('7 days forecast'),
         ),
-        for (final weather in data.daily)
-          ListTile(
+        ...data.daily.map((e) {
+          final weather = e;
+          final temperatureMin = weather.temperatureMin.withUnit(unit);
+          final temperatureMax = weather.temperatureMax.withUnit(unit);
+
+          return ListTile(
             leading: SizedBox(
               height: 32,
               width: 32,
               child: ExtendedImage.network(weather.icon),
             ),
             title: Text(weather.description),
-            trailing: Text('${weather.temperatureMin}° / '
-                '${weather.temperatureMax}°'),
-          ),
+            trailing: Text('${temperatureMin.value.ceil()}° / '
+                '${temperatureMax.value.ceil()}°'),
+          );
+        }),
       ],
     ));
   }
