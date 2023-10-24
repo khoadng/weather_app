@@ -3,25 +3,29 @@ class WmoDescriptionData {
   final String dayImage;
   final String nightDescription;
   final String nightImage;
-  final String background;
+  final String backgroundDay;
+  final String backgroundNight;
 
   WmoDescriptionData({
     required this.dayDescription,
     required this.dayImage,
     required this.nightDescription,
     required this.nightImage,
-    required this.background,
+    required this.backgroundDay,
+    required this.backgroundNight,
   });
 
   WmoDescriptionData copyWith({
-    String? background,
+    String? backgroundDay,
+    String? backgroundNight,
   }) {
     return WmoDescriptionData(
       dayImage: dayImage,
       nightImage: nightImage,
       nightDescription: nightDescription,
       dayDescription: dayDescription,
-      background: background ?? this.background,
+      backgroundDay: backgroundDay ?? this.backgroundDay,
+      backgroundNight: backgroundNight ?? this.backgroundNight,
     );
   }
 
@@ -31,7 +35,8 @@ class WmoDescriptionData {
       dayImage: json['day']['image'],
       nightDescription: json['night']['description'],
       nightImage: json['night']['image'],
-      background: '',
+      backgroundDay: '',
+      backgroundNight: '',
     );
   }
 }

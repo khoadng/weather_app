@@ -1,4 +1,5 @@
 import 'package:weather_app/models/tempeture.dart';
+import 'package:weather_app/models/time.dart';
 
 import '../data/open_meteo/open_meteo_client.dart';
 import '../data/wmo/types.dart';
@@ -27,7 +28,7 @@ class WeatherRepository {
 
     return WeatherData(
       hourly: [
-        for (var i = 0; i < openMeteoWeatherData.weatherCode.length; i++)
+        for (var i = 0; i < 24; i++)
           HourlyWeatherData(
             temperature:
                 Temperature.celsius(openMeteoWeatherData.temperature2m[i]),
@@ -95,34 +96,25 @@ String getWeatherIconUrl(
   String weatherCode,
   DateTime time,
   Map<String, WmoDescriptionData> wmoData,
-) {
-  final isNight = time.hour > 18 || time.hour < 6;
-
-  return isNight
-      ? wmoData[weatherCode]!.nightImage
-      : wmoData[weatherCode]!.dayImage;
-}
+) =>
+    time.isNight()
+        ? wmoData[weatherCode]!.nightImage
+        : wmoData[weatherCode]!.dayImage;
 
 String getWeatherBackground(
   String weatherCode,
   DateTime time,
   Map<String, WmoDescriptionData> wmoData,
-) {
-  final isNight = time.hour > 18 || time.hour < 6;
-
-  return isNight
-      ? wmoData[weatherCode]!.background
-      : wmoData[weatherCode]!.background;
-}
+) =>
+    time.isNight()
+        ? wmoData[weatherCode]!.backgroundNight
+        : wmoData[weatherCode]!.backgroundDay;
 
 String getWeatherDescription(
   String weatherCode,
   DateTime time,
   Map<String, WmoDescriptionData> wmoData,
-) {
-  final isNight = time.hour > 18 || time.hour < 6;
-
-  return isNight
-      ? wmoData[weatherCode]!.nightDescription
-      : wmoData[weatherCode]!.dayDescription;
-}
+) =>
+    time.isNight()
+        ? wmoData[weatherCode]!.nightDescription
+        : wmoData[weatherCode]!.dayDescription;

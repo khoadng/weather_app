@@ -22,7 +22,7 @@ class FloatingGlassyCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Material(
           elevation: 12,
-          color: Theme.of(context).cardColor.withOpacity(0.7),
+          color: Theme.of(context).cardColor.withOpacity(0.4),
           type: MaterialType.card,
           child: SizedBox(
             width: width ?? MediaQuery.of(context).size.width * 0.9,

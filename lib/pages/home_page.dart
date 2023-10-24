@@ -32,6 +32,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ? Positioned.fill(
                               child: ExtendedImage.network(
                                 data.current.background,
+                                enableLoadState: false,
                                 fit: BoxFit.cover,
                               ),
                             )
@@ -118,19 +119,30 @@ class _HomePageState extends ConsumerState<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            '${data.current.temperature.withUnit(unit).value.ceil()}°',
-            style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                  color: Colors.white,
-                  fontSize: 100,
+          const Spacer(flex: 1),
+          Flexible(
+            flex: 5,
+            child: Column(
+              children: [
+                Text(
+                  '${data.current.temperature.withUnit(unit).value.ceil()}°',
+                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                        color: Colors.white,
+                        fontSize: 100,
+                      ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  data.current.description,
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            data.current.description,
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  color: Colors.white,
-                ),
+          Spacer(
+            flex: 1,
           ),
         ],
       ),
@@ -142,6 +154,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     TemperatureUnit unit = TemperatureUnit.celsius,
   }) {
     return FloatingGlassyCard(
+      width: MediaQuery.of(context).size.width * 0.95,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -187,30 +200,32 @@ class _HomePageState extends ConsumerState<HomePage> {
     TemperatureUnit unit = TemperatureUnit.celsius,
   }) {
     return FloatingGlassyCard(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(12),
-          child: Text('7 days forecast'),
-        ),
-        ...data.daily.map((e) {
-          final weather = e;
-          final temperatureMin = weather.temperatureMin.withUnit(unit);
-          final temperatureMax = weather.temperatureMax.withUnit(unit);
+      width: MediaQuery.of(context).size.width * 0.95,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text('7 days forecast'),
+          ),
+          ...data.daily.map((e) {
+            final weather = e;
+            final temperatureMin = weather.temperatureMin.withUnit(unit);
+            final temperatureMax = weather.temperatureMax.withUnit(unit);
 
-          return ListTile(
-            leading: SizedBox(
-              height: 32,
-              width: 32,
-              child: ExtendedImage.network(weather.icon),
-            ),
-            title: Text(weather.description),
-            trailing: Text('${temperatureMin.value.ceil()}° / '
-                '${temperatureMax.value.ceil()}°'),
-          );
-        }),
-      ],
-    ));
+            return ListTile(
+              leading: SizedBox(
+                height: 32,
+                width: 32,
+                child: ExtendedImage.network(weather.icon),
+              ),
+              title: Text(weather.description),
+              trailing: Text('${temperatureMin.value.ceil()}° / '
+                  '${temperatureMax.value.ceil()}°'),
+            );
+          }),
+        ],
+      ),
+    );
   }
 }
